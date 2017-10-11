@@ -72,7 +72,7 @@ How To Run Ansible Playbook:
 
 4)For DB01 role
 
-# ansible-playbook /etc/ansible/roles/mysql/mysqlserver.yml -i hosts -l dbserver
+#ansible-playbook /etc/ansible/roles/mysql/mysqlserver.yml -i hosts -l dbserver
 
 
 
