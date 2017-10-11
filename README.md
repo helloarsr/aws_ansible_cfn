@@ -12,7 +12,9 @@ Pre-requisite before start the Project:
 
 5)Create a Github account to maintain this project documentaion and placing the project repository
 
-# aws_ansible_templates:
+6)Creat a domain name using freenom.com site to access the appplicationusing DNS name
+
+# aws_ansible_cloudformation templates:
 ----------------------------------------------------
 aws and ansible automated application(Web,App and DB) installation projects
 
@@ -36,14 +38,41 @@ Create a cloudformation templates:
 
 5-Ansible Control instance
   
-6)Ansible Roles 
+6-Ansible Roles 
 
   a)Opencms -Istall and configure  Opencms app on App instance deploying on tomcat server
+  
   b)webserver -Install and configure MySQL on DB instance.
+  
   c)tomcat -Install and configure Tomcat on App instance
+  
   d)mysqldb - install and configure MySQL on DB instance.
 
-7)Route 53 :
+7-Route 53 :
+  
   a)create a recode set for www with EIP of WEB01 (this should be configured as per DNS redirecting URL on freenom.com )
+  
   b)accessing the app through domain name www.opencmsapp.tk
+
+
+How To Run Ansible Playbook:
+-------------------------------------------------------------------
+
+1)For WEB01 role
+
+#ansible-playbook /etc/asnible/roles/webserver/web.yml -i /etc/ansible/hosts -l webserver -s
+
+2)For APP01 role
+
+#ansible-playbook /etc/ansible/roles/tomcat/tomcat.yml -i /etc/ansible/hosts -l appserver
+
+3)For OPENCMSAPP role
+
+#ansible-playbook /etc/ansible/tomcat_app.yml -i /etc/ansible/hosts -l appserver
+
+4)For DB01 role
+
+# ansible-playbook /etc/ansible/roles/mysql/mysqlserver.yml -i hosts -l dbserver
+
+
 

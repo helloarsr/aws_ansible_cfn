@@ -1,23 +1,33 @@
-============= Ansible playbook,roles for WEB01,APP01,DB01 ========================================
+============= Ansible playbook,roles for WEB01,APP01,DB01 ========================
+
 Ansible Roles: 
+
   a)Opencms -Istall and configure  Opencms app on App instance deploying on tomcat server
+
   b)webserver -Install and configure MySQL on DB instance.
+
   c)tomcat -Install and configure Tomcat on App instance
+
   d)mysqldb - install and configure MySQL on DB instance.
 
 Route 53 :
+
   a)create a recode set for www with EIP of WEB01 (this should be configured as per DNS redirecting URL )
+
   b)accessign the app www.opencmsapp.tk
 
 Ansible Control server:
 -----------------------------------------------------------------------------------------------
+
 1)Installation of git and check git version
+
 ex:
 [root@ip-10-0-0-250 ec2-user]# yum install -y git
 [root@ip-10-0-0-250 ec2-user]# git --version
 git version 1.8.3.1
 
 2)Install and configure latest version of Ansible on controle instance with  RHEL
+
 #yum install -y ansible
 https://developers.redhat.com/blog/2016/09/02/how-to-install-and-configure-ansible-on-rhel/
 
@@ -35,7 +45,8 @@ Project installation work :
 
 https://github.com/rajaprojects/aws_ansible_templates.git
 
-2) On Ansible Master server :
+2)On Ansible Master server :
+
 [root@ip-10-0-0-250 ansible]# useradd -d /home/ansadm -m ansadm
 [root@ip-10-0-0-250 ansible]# passwd ansadm
 Changing password for user ansadm.
@@ -65,6 +76,7 @@ Your public key has been saved in /home/ansadm/.ssh/id_rsa.pub.
 #
 
 4)Please make sure that give the appropriate permissions and verify the connecting from ansible server using SSH agent
+
 vi authorized_keys 
 #chomod 700 .ssh 
 #chmod 600 authorized_keys
@@ -72,12 +84,12 @@ vi authorized_keys
 
 5)add the hosts names groups in /etc/ansible in "hosts" but make sure "/etc/ansible" mount point should mapped to user:ansadm and groupid:ansadm"
 for WEWB01 ,APP01 and DB01 instances 
+
 [webserver]
 [appserver]
 [dbserver]
 
-
-6) On App01 server :
+6)On App01 server :
 
 [root@ip-10-0-2-122 ec2-user]# useradd -d /home/ansadm -m ansadm
 [root@ip-10-0-2-122 ec2-user]# passwd ansadm
@@ -104,7 +116,7 @@ Then do ssh from ansible control server check all servers able to connect withou
 
 [ansadm@ip-10-0-0-250 ~]$ ssh ansadm@ip-10-0-2-122.ec2.internal
 
-7) run ping module to check connectivity with passowrdless -SSH agen from ansible control server
+7)run ping module to check connectivity with passowrdless -SSH agen from ansible control server
 
 [ansadm@ip-10-0-0-250 ansible]$ ansible appserver -m ping
 10.0.2.122 | SUCCESS => {
@@ -117,6 +129,7 @@ ip-10-0-2-122.ec2.internal | SUCCESS => {
 }
 
 8) we should add ansadm user in to /etc/sudoers then only package yum installtion should success into all the nodes 
+
 ##ansible admin user
 ansadm ALL=NOPASSWD: ALL
 
@@ -124,7 +137,7 @@ ansadm ALL=NOPASSWD: ALL
 
 
 ================== WEB01 installation ====================
-https://www.digitalocean.com/community/tutorials/how-to-set-up-apache-virtual-hosts-on-centos-7
+1)
 
 Through Ansible role 
 i changed in default server web01 
@@ -165,7 +178,8 @@ ip-10-0-2-194.ec2.internal : ok=20   changed=16   unreachable=0    failed=1
 
 =============== 3) DB server ========================
 
-1) To check MySql verion:
+1)To check MySql verion:
+
 Installign Mysql using mysqldb role from ansible control server 
 
 [root@ip-10-0-26-9 ec2-user]# mysqladmin version
@@ -190,7 +204,8 @@ or
 
 [root@ip-10-0-26-9 ec2-user]# mysql -version
 
-2) How to start ,stop,restart and status of MySql ?
+2)How to start ,stop,restart and status of MySql ?
+
 [root@ip-10-0-26-9 mysql]# service mysql start
 [root@ip-10-0-26-9 mysql]# service mysql stop
 [root@ip-10-0-26-9 mysql]# service mysql restart
@@ -249,12 +264,7 @@ Oct 10 12:25:50 ip-10-0-26-9.ec2.internal systemd[1]: Started MySQL Community Se
 
 
 2nd time connecting :
-[root@ip-10-0-26-9 mysql]# mysql -u root -p
-Enter password:
-ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
-[root@ip-10-0-26-9 mysql]# su ansadm
-[ansadm@ip-10-0-26-9 mysql]$ mysql -u root -p
-Enter password:
+
 ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
 [ansadm@ip-10-0-26-9 mysql]$ mysql -u root -p
 
@@ -266,6 +276,9 @@ https://serverfault.com/questions/516934/after-installing-mysql-5-6-the-server-c
 [ansadm@ip-10-0-26-9 conf.d]$ exit
 exit
 [root@ip-10-0-26-9 mysql]# mysql -u root -S /var/run/mysqld/mysqld.sock
+or 
+[root@ip-10-0-26-9 mysql]# mysql -h ip-10-0-26-9.ec2.internal -u root
+
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 5
 Server version: 5.6.37 MySQL Community Server (GPL)
@@ -411,7 +424,6 @@ Correct :
 insert into user values ('localhost', 'opencmsuser', 'password', 'N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N', 'N','N','N','N','N','', 'NULL', 'NULL', 'NULL','0','0','0','0', 'mysql_native_password','NULL','N');
 
 insert into user values ('ip-10-0-26-9.ec2.internal', 'opencmsuser', 'password', 'N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N', 'N','N','N','N','N','', 'NULL', 'NULL', 'NULL','0','0','0','0', 'mysql_native_password','NULL','N');
-
 flush privileges;
 
 ------------------ using db table inserted ---------------------------
