@@ -1,0 +1,10 @@
+---
+- hosts: webserver
+  become_user: root 
+  become_method: sudo
+#  sudo: True
+#  vars_files:
+ #   - vars/AmazonLinux.yml
+  roles:
+    - webserver
+

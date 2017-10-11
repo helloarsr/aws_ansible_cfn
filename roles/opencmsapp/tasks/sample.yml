@@ -1,0 +1,8 @@
+  - name: copying  Sample war file
+      copy:
+      src: "/tmp/sample.war"
+      dest: "{{catalina_home}}/webapps/sample.war"
+      owner: "{{ tomcat_user }}"
+      group: "{{ tomcat_user }}"
+      remote_src: yes
+

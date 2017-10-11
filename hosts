@@ -1,0 +1,8 @@
+[webserver]
+#ip-10-0-0-30.ec2.internal
+52.44.149.60
+[appserver]
+ip-10-0-2-194.ec2.internal
+
+[dbserver]
+ip-10-0-26-9.ec2.internal

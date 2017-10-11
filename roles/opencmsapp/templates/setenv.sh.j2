@@ -1,0 +1,6 @@
+export JAVA_OPTS="$JAVA_OPTS -server -Xms512m -Xmx512m -Djava.awt.headless=true\
+ -XX:+HeapDumpOnOutOfMemoryError\
+ -XX:HeapDumpPath=/var/log/tomcat7\
+ -XX:MaxPermSize=128m\
+ -XX:MaxNewSize=256m\
+ -XX:NewSize=256m"
