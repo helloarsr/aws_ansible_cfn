@@ -1,0 +1,306 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+	
+	"Description" : "Create VPC, Subnets, IGW, Route Tables and Security Groups for 3-tier app(WEB01 ,APP01 and DB01)",
+	
+	"Parameters" : {
+
+		"StackName" : {
+			"Description" : "The name of the Stack",
+			"Type": "String",
+			"MinLength": "1",
+			"MaxLength": "18",
+			"Default" : "vpcstack",
+			"ConstraintDescription": "A short name to identify this swimlane (USE LOWERCASE ONLY as this name is also used for S3 bucket name.)"
+		},
+		
+		"VPCCIDR" : {
+			"Description" : " The VPC CIDR Block",
+			"Type": "String",
+			"MinLength": "9",
+			"MaxLength": "18",
+			"Default": "10.0.0.0/16",
+			"AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x."
+		},		
+		
+		"WebCIDR" : {
+			"Description" : "The first subnet's CIDR Block for WEB app",
+			"Type": "String",
+			"MinLength": "9",
+			"MaxLength": "18",
+			"Default": "10.0.0.0/24",
+			"AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x"
+		},	
+		
+		"AppCIDR" : {
+			"Description" : "The second subnet's CIDR Block for Appserver",
+			"Type": "String",
+			"MinLength": "9",
+			"MaxLength": "18",
+			"Default": "10.0.2.0/24",
+			"AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x"
+		},
+
+		"DBCIDR" : {
+			"Description" : "The third subnet's CIDR Block for DataBase ",
+			"Type": "String",
+			"MinLength": "9",
+			"MaxLength": "18",
+			"Default": "10.0.26.0/26",
+			"AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+			"ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x"
+		},
+
+		"StackAvailabilityZone" : {
+			"Description" : "The stack subnet's AZ center",
+			"Type": "String",
+			"MinLength": "10",
+			"MaxLength": "18",
+			"Default" : "us-east-1a",
+			"ConstraintDescription": "Must be a valid AZ in the Region where Stack is to be created."
+		}
+
+	},
+	
+	"Resources" : {
+		"VPCID" : {
+			"Type" : "AWS::EC2::VPC",
+			"Properties" : {
+			"CidrBlock" : { "Ref" : "VPCCIDR" },
+			"EnableDnsHostnames" : "true",
+			"EnableDnsSupport" : "true",
+			"Tags" : [{
+					"Key": "Name",
+					"Value": {"Fn::Join": ["-",["vpcstack", { "Ref" : "AWS::Region" }]]}
+				}]
+			}
+		},
+
+		"WEBSubnet" : {
+			"Type" : "AWS::EC2::Subnet",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"CidrBlock" : { "Ref" : "WebCIDR" },
+				"AvailabilityZone" : { "Ref" : "StackAvailabilityZone" },
+				"MapPublicIpOnLaunch" : "true",
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : {"Fn::Join" : [ "",	[ { "Ref" : "StackName"}, "-", { "Ref" : "StackAvailabilityZone"}, "-", "WEBSubnet"]]}} ,
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 
+				]
+			}					
+		},
+
+		"APPSubnet": {
+			"Type" : "AWS::EC2::Subnet",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"CidrBlock" : { "Ref" : "AppCIDR" },
+				"AvailabilityZone" : { "Ref" : "StackAvailabilityZone" },
+				"MapPublicIpOnLaunch" : "true",
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : {"Fn::Join" : [ "",	[ { "Ref" : "StackName"}, "-", { "Ref" : "StackAvailabilityZone"}, "-", "APPSubnet"]]}} ,
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 
+				]
+			}					
+		},	
+
+		"DBSubnet" : {
+			"Type" : "AWS::EC2::Subnet",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"CidrBlock" : { "Ref" : "DBCIDR" },
+				"AvailabilityZone" : { "Ref" : "StackAvailabilityZone" },
+				"MapPublicIpOnLaunch" : "true",
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : {"Fn::Join" : [ "",	[ { "Ref" : "StackName"}, "-", { "Ref" : "StackAvailabilityZone"}, "-", "DBSubnet"]]}} ,
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 
+				]
+			}					
+		},
+
+		"InternetGateway" : {
+			"Type" : "AWS::EC2::InternetGateway",
+			"Properties" : {
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : {"Fn::Join" : [ "",	[ { "Ref" : "StackName"}, "-", "IGW"]]}},
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 
+				]
+			}
+		},
+
+		"AttachInternetGateway" : {
+			"Type" : "AWS::EC2::VPCGatewayAttachment",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"InternetGatewayId" : { "Ref" : "InternetGateway" }
+			},
+			"DependsOn" : "InternetGateway"
+		},
+
+		"RouteTable" : {
+			"Type" : "AWS::EC2::RouteTable",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : "Main VPC Routing" },
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 				
+				]
+			}
+		},
+
+		"RouteInternet" : {
+			"Type" : "AWS::EC2::Route",
+			"Properties" : {
+				"RouteTableId" : { "Ref" : "RouteTable" },
+				"DestinationCidrBlock" : "0.0.0.0/0",
+				"GatewayId" : { "Ref" : "InternetGateway" }
+			},
+			"DependsOn" : "AttachInternetGateway"
+		},
+
+		"WebSubnetRouteTableAssociation" : {
+			"Type" : "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties" : {
+					"SubnetId" : { "Ref" : "WEBSubnet" },
+					"RouteTableId" : { "Ref" : "RouteTable" }
+				}
+		},	
+
+		"AppSubnetRouteTableAssociation" : {
+			"Type" : "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties" : {
+					"SubnetId" : { "Ref" : "APPSubnet" },
+					"RouteTableId" : { "Ref" : "RouteTable" }
+			}
+		},
+
+		"DataSubnetRouteTableAssociation" : {
+			"Type" : "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties" : {
+					"SubnetId" : { "Ref" : "DBSubnet" },
+					"RouteTableId" : { "Ref" : "RouteTable" }
+			}
+		},
+
+		"WebSecurityGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"GroupDescription" : "Security Group for Web Net",
+				"SecurityGroupIngress" : [
+					{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"},
+					{"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
+					{"IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"}
+				],
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : {"Fn::Join" : [ "", [ { "Ref" : "StackName"}, "-", "WebSG"]]} },
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 				
+				]				
+			}
+		},
+		
+		"WebSecurityGroupSelfRef" : {
+			"Type" : "AWS::EC2::SecurityGroupIngress",
+			"Properties" : {
+				"GroupId" : { "Ref" : "WebSecurityGroup" },
+				"IpProtocol" : "-1",
+				"FromPort" : "-1",
+				"ToPort" : "-1",
+				"SourceSecurityGroupId" : { "Ref" : "WebSecurityGroup" }
+			},
+			"DependsOn" : "WebSecurityGroup"
+		},		
+		
+		"AppSecurityGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"GroupDescription" : "Security Group for App Net",
+				"SecurityGroupIngress" : [
+					{"IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupId" : { "Ref" : "WebSecurityGroup" }},
+					{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"},
+					{"IpProtocol" : "tcp", "FromPort" : "8000", "ToPort" : "8999", "SourceSecurityGroupId" : { "Ref" : "WebSecurityGroup" }}
+				],
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : {"Fn::Join" : [ "", [ { "Ref" : "StackName"}, "-", "AppSG"]]} },
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 				
+				]				
+			}
+		},
+		
+		"AppSecurityGroupSelfRef" : {
+			"Type" : "AWS::EC2::SecurityGroupIngress",
+			"Properties" : {
+				"GroupId" : { "Ref" : "AppSecurityGroup" },
+				"IpProtocol" : "-1",
+				"FromPort" : "-1",
+				"ToPort" : "-1",
+				"SourceSecurityGroupId" : { "Ref" : "AppSecurityGroup" }
+			},
+			"DependsOn" : "AppSecurityGroup"
+		},			
+
+		"DBSecurityGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"VpcId" : { "Ref" : "VPCID" },
+				"GroupDescription" : "Security Group for Data Net",
+				"SecurityGroupIngress" : [	
+					{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"},
+					{"IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupId" : { "Ref" : "AppSecurityGroup" }},
+					{"IpProtocol" : "-1", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupId" : { "Ref" : "WebSecurityGroup" }}
+				],
+				"Tags" : [ 
+					{"Key" : "Name", "Value" : {"Fn::Join" : [ "", [ { "Ref" : "StackName"}, "-", "DataBaseSG"]]} },
+					{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } 				
+				]				
+			}
+		},
+
+		"DBSecurityGroupSelfRef" : {
+			"Type" : "AWS::EC2::SecurityGroupIngress",
+			"Properties" : {
+				"GroupId" : { "Ref" : "DBSecurityGroup" },
+				"IpProtocol" : "-1",
+				"FromPort" : "-1",
+				"ToPort" : "-1",
+				"SourceSecurityGroupId" : { "Ref" : "DBSecurityGroup" }
+			},
+			"DependsOn" : "DBSecurityGroup"
+		}
+	},
+
+	"Outputs" : {
+		"WebSubnet" : {
+			"Description": "WebSubnet",
+			"Value": { "Ref" : "WEBSubnet" }
+		},
+		"AppSubnet" : {
+			"Description": "AppServerSubnet",
+			"Value": { "Ref" : "APPSubnet" }
+		},
+		"DataSubnet" : {
+			"Description": "DataBaseSubnet",
+			"Value": { "Ref" : "DBSubnet" }
+		},
+		"RouteTable" : {
+			"Description": "RouteTable",
+			"Value" : { "Ref" : "RouteTable" }
+		},
+		"WebNetSecurityGroup" : {
+			"Description": "Web01NetworkSecurityGroup",
+			"Value": { "Ref" : "WebSecurityGroup" }
+		},
+		"AppNetSecurityGroup" : {
+			"Description": "App01NetworkSecurityGroup",
+			"Value": { "Ref" : "AppSecurityGroup" }
+		},
+		"DataNetSecurityGroup" : {
+			"Description": "DBNetworkSecurityGroup",
+			"Value": { "Ref" : "DBSecurityGroup" }
+		}
+	}
+}
