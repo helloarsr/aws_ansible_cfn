@@ -1,6 +1,8 @@
-============= Ansible playbook,roles for WEB01,APP01,DB01 ========================
+Ansible playbooks and roles for WEB01,APP01,DB01
+---------------------------------------------------------------
 
 Ansible Roles: 
+-------------------------------------------------------------
 
   a)Opencms -Istall and configure  Opencms app on App instance deploying on tomcat server
 
@@ -11,12 +13,13 @@ Ansible Roles:
   d)mysqldb - install and configure MySQL on DB instance.
 
 Route 53 :
+--------------------------------------------------------------
 
   a)create a recode set for www with EIP of WEB01 (this should be configured as per DNS redirecting URL )
 
-  b)accessign the app www.opencmsapp.tk
+  b)accessing the app www.opencmsapp.tk
 
-Ansible Control server:
+Ansible Control Server:
 -----------------------------------------------------------------------------------------------
 
 1)Installation of git and check git version
@@ -136,7 +139,8 @@ ansadm ALL=NOPASSWD: ALL
 [root@ip-10-0-0-250 ansible]# vi /etc/sudoers
 
 
-================== WEB01 installation ====================
+WEB01 Installation :
+-------------------------------------------------------------------
 1)
 
 Through Ansible role 
@@ -161,7 +165,8 @@ https://www.tecmint.com/disable-selinux-temporarily-permanently-in-centos-rhel-f
 [root@ip-10-0-0-30 targeted]#
 
 
-===================== 2) tomcat and app ====================
+Tomcat and OpenCms,SampleAppp:
+------------------------------------------------------------
 
 TASK [opencmsapp : Configure Tomcat server env file] ****************************************************************************************************************************
 changed: [ip-10-0-2-194.ec2.internal]
@@ -176,7 +181,8 @@ ip-10-0-2-194.ec2.internal : ok=20   changed=16   unreachable=0    failed=1
 [ansadm@ip-10-0-0-250 ansible]$ ansible-playbook tomcat_app.yml -i hosts -l appserver
 
 
-=============== 3) DB server ========================
+DB01 server :
+--------------------------------------------------------------
 
 1)To check MySql verion:
 
